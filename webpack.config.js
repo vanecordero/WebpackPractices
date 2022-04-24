@@ -2,12 +2,14 @@ const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const CopyPlugin = require("copy-webpack-plugin");
+const CssMinizerPLugin = require("css-minimizer-webpack-plugin");
+const TerserPlugin = require("terser-webpack-plugin");
 
 module.exports = {
   entry: "./src/index.js",
   output: {
     path: path.resolve(__dirname, "dist"),
-    filename: "main.js",
+    filename: "[name].[contenthash].js",
     assetModuleFilename: "assets/images/[hash][ext][query]",
   },
   resolve: {
@@ -41,7 +43,7 @@ module.exports = {
             // Especifica el tipo MIME con el que se alineará el archivo.
             // Los MIME Types (Multipurpose Internet Mail Extensions)
             // son la manera standard de mandar contenido a través de la red.
-            name: "[name].[ext]",
+            name: "[name].[contenthash].[ext]",
             // EL NOMBRE INICIAL DEL ARCHIVO + SU EXTENSIÓN
             // PUEDES AGREGARLE [name]hola.[ext] y el output del archivo seria
             // ubuntu-regularhola.woff
@@ -62,7 +64,9 @@ module.exports = {
       template: "./public/index.html",
       filename: "./index.html",
     }),
-    new MiniCssExtractPlugin(),
+    new MiniCssExtractPlugin({
+      filename: "assets/[name].[contenthash].css",
+    }),
     new CopyPlugin({
       patterns: [
         {
@@ -72,4 +76,8 @@ module.exports = {
       ],
     }),
   ],
+  optimization: {
+    minimize: true,
+    minimizer: [new CssMinizerPLugin(), new TerserPlugin()],
+  },
 };

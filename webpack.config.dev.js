@@ -2,10 +2,7 @@ const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const CopyPlugin = require("copy-webpack-plugin");
-const CssMinizerPLugin = require("css-minimizer-webpack-plugin");
-const TerserPlugin = require("terser-webpack-plugin");
 const Dotenv = require("dotenv-webpack");
-const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 
 module.exports = {
   entry: "./src/index.js",
@@ -14,6 +11,7 @@ module.exports = {
     filename: "[name].[contenthash].js",
     assetModuleFilename: "assets/images/[hash][ext][query]",
   },
+  mode: "development",
   resolve: {
     extensions: [".js"],
     alias: {
@@ -41,10 +39,27 @@ module.exports = {
         type: "asset/resource",
       },
       {
-        test: /\.(woff|woff2)$/i, // Tipos de fuentes a incluir
-        type: "asset/resource", // Tipo de módulo a usar (este mismo puede ser usado para archivos de imágenes)
-        generator: {
-          filename: "assets/fonts/[hash][ext][query]", // Directorio de salida
+        test: /\.(woff|woff2)$/,
+        use: {
+          loader: "url-loader",
+          options: {
+            limit: 10000, // O LE PASAMOS UN BOOLEANOS TRUE O FALSE
+            // Habilita o deshabilita la transformación de archivos en base64.
+            mimetype: "aplication/font-woff",
+            // Especifica el tipo MIME con el que se alineará el archivo.
+            // Los MIME Types (Multipurpose Internet Mail Extensions)
+            // son la manera standard de mandar contenido a través de la red.
+            name: "[name].[contenthash].[ext]",
+            // EL NOMBRE INICIAL DEL ARCHIVO + SU EXTENSIÓN
+            // PUEDES AGREGARLE [name]hola.[ext] y el output del archivo seria
+            // ubuntu-regularhola.woff
+            outputPath: "./assets/fonts/",
+            // EL DIRECTORIO DE SALIDA (SIN COMPLICACIONES)
+            publicPath: "../assets/fonts/",
+            // EL DIRECTORIO PUBLICO (SIN COMPLICACIONES)
+            esModule: false,
+            // AVISAR EXPLICITAMENTE SI ES UN MODULO
+          },
         },
       },
     ],
@@ -67,10 +82,5 @@ module.exports = {
       ],
     }),
     new Dotenv(),
-    new CleanWebpackPlugin(),
   ],
-  optimization: {
-    minimize: true,
-    minimizer: [new CssMinizerPLugin(), new TerserPlugin()],
-  },
 };
